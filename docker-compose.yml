@@ -6,21 +6,44 @@ services:
       - redis
     ports:
       - "80:80"
+    networks:
+      - votenet
   results:
     build: ./result
     ports:
       - "81:80"
     depends_on:
       - db
+    networks:
+      - resnet
   worker:
     build: ./worker
     depends_on:
       - db
       - redis
+    networks:
+      - resnet
+      - votenet
   db:
     image: postgres:15-alpine
     environment: 
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: 'postgres'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - resnet
   redis:
     image: redis:alpine
+    volumes:
+      - redis_data:/data
+    networks:
+      - votenet
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  votenet:
+  resnet:
